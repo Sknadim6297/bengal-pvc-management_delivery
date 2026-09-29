@@ -7,9 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
-    protected $fillable = [
-        'gateway', 'transaction_id', 'amount', 'status', 'paid_at', 'metadata',
-    ];
+    protected $fillable = ['gateway', 'transaction_id', 'amount', 'status', 'paid_at', 'metadata'];
 
     protected function casts(): array
     {

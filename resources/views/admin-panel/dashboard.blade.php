@@ -15,12 +15,14 @@
             @foreach ([
                 ['Total Users', $statistics->total_users, 'bi-people-fill', 'users'],
                 ['Active Users', $statistics->active_users, 'bi-person-check-fill', 'active'],
-                ['Suspended Users', $statistics->suspended_users, 'bi-person-fill-slash', 'suspended'],
-                ['Total PVC Orders', $statistics->total_pvc_orders, 'bi-credit-card-2-front-fill', 'orders'],
+                ['Total Orders', $statistics->total_orders, 'bi-box-seam-fill', 'orders'],
+                ['Pending Orders', $statistics->pending_orders, 'bi-hourglass-split', 'processing'],
                 ['Processing Orders', $statistics->processing_orders, 'bi-gear-wide-connected', 'processing'],
                 ['Delivered Orders', $statistics->delivered_orders, 'bi-check-circle-fill', 'delivered'],
                 ['Failed Orders', $statistics->failed_orders, 'bi-exclamation-triangle-fill', 'failed'],
-                ['Total Photo Orders', $statistics->total_photo_orders, 'bi-image-fill', 'photos'],
+                ['Total Revenue', '₹'.number_format((float) $statistics->total_revenue, 2), 'bi-currency-rupee', 'photos'],
+                ["Today's Orders", $statistics->today_orders, 'bi-calendar-check', 'active'],
+                ["Today's Revenue", '₹'.number_format((float) $statistics->today_revenue, 2), 'bi-cash-stack', 'photos'],
             ] as [$label, $value, $icon, $tone])
                 <div class="col-12 col-sm-6 col-xl-3">
                     <div class="stat-card admin-stat-card admin-stat-{{ $tone }}">
@@ -54,14 +56,33 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td colspan="6">
-                                <div class="admin-empty-state">
-                                    <i class="bi bi-inbox" aria-hidden="true"></i>
-                                    <span>No orders found</span>
-                                </div>
-                            </td>
-                        </tr>
+                        @forelse ($recentOrders as $recentOrder)
+                            <tr>
+                                <td>{{ $recentOrder->order_number }}</td>
+                                <td>{{ $recentOrder->user?->name ?? 'Deleted user' }}</td>
+                                <td>{{ $recentOrder->service_type === 'pvc-card' ? 'PVC Card Print' : ucfirst(str_replace('-', ' ', $recentOrder->service_type)) }}</td>
+                                <td>{{ ucfirst(str_replace('_', ' ', $recentOrder->status)) }}</td>
+                                <td>{{ $recentOrder->created_at?->format('Y-m-d') }}</td>
+                                <td>
+                                    @if ($recentOrder->service_type === 'pvc-card')
+                                        <a href="{{ route('admin.pvc-orders.show', $recentOrder->id) }}" class="admin-link-button">Details</a>
+                                    @elseif ($recentOrder->service_type === 'photo-print')
+                                        <a href="{{ route('admin.photo-orders.show', $recentOrder->id) }}" class="admin-link-button">Details</a>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6">
+                                    <div class="admin-empty-state">
+                                        <i class="bi bi-inbox" aria-hidden="true"></i>
+                                        <span>No orders found</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

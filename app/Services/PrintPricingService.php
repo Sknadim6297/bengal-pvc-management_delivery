@@ -27,14 +27,12 @@ class PrintPricingService
         $tier = $quality->pricingTiers()
             ->where('enabled', true)
             ->where('min_quantity', '<=', $quantity)
-            ->where(function ($query) use ($quantity): void {
-                $query->whereNull('max_quantity')->orWhere('max_quantity', '>=', $quantity);
-            })
+            ->where(fn ($query) => $query->whereNull('max_quantity')->orWhere('max_quantity', '>=', $quantity))
             ->orderByDesc('min_quantity')
             ->first();
 
         if (! $tier) {
-            throw ValidationException::withMessages(['quality' => 'Pricing is not available for that quantity.']);
+            throw ValidationException::withMessages(['print_quality' => 'Pricing is not available for that quantity.']);
         }
 
         $baseUnit = self::toPaise($tier->base_unit_price);
@@ -46,7 +44,7 @@ class PrintPricingService
 
         if ($coverSelected) {
             if ($serviceSlug !== 'pvc-card' || ! $service->coverSetting?->enabled) {
-                throw ValidationException::withMessages(['cover' => 'Custom printed covers are unavailable.']);
+                throw ValidationException::withMessages(['include_card_cover' => 'Custom printed covers are unavailable.']);
             }
 
             $coverUnit = self::toPaise($service->coverSetting->price_per_card);
@@ -95,7 +93,6 @@ class PrintPricingService
         }
 
         [$rupees, $paise] = array_pad(explode('.', $amount, 2), 2, '');
-
         return ((int) $rupees * 100) + (int) str_pad($paise, 2, '0');
     }
 

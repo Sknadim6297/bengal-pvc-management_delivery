@@ -10,7 +10,6 @@ use App\Services\AdminDashboardStatistics;
 use App\Support\IndianPhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -19,19 +18,16 @@ class UserManagementController extends Controller
     public function index(AdminUserIndexRequest $request): View
     {
         $filters = $request->validated();
-        $users = User::query()
-            ->where('role', User::ROLE_USER)
-            ->where('id', '!=', Auth::id())
-            ->select([
-                'id',
-                'name',
-                'email',
-                'whatsapp_number',
-                'district',
-                'role',
-                'status',
-                'created_at',
-            ]);
+        $users = User::query()->select([
+            'id',
+            'name',
+            'email',
+            'whatsapp_number',
+            'district',
+            'role',
+            'status',
+            'created_at',
+        ]);
 
         if (! empty($filters['role'])) {
             $users->where('role', $filters['role']);
@@ -96,22 +92,18 @@ class UserManagementController extends Controller
 
     public function show(int $userId): View
     {
-        $user = User::query()
-            ->where('role', User::ROLE_USER)
-            ->where('id', '!=', Auth::id())
-            ->select([
-                'id',
-                'name',
-                'email',
-                'whatsapp_number',
-                'district',
-                'role',
-                'status',
-                'email_verified_at',
-                'created_at',
-                'updated_at',
-            ])
-            ->findOrFail($userId);
+        $user = User::query()->select([
+            'id',
+            'name',
+            'email',
+            'whatsapp_number',
+            'district',
+            'role',
+            'status',
+            'email_verified_at',
+            'created_at',
+            'updated_at',
+        ])->findOrFail($userId);
 
         return view('admin-panel.users.show', ['user' => $user]);
     }

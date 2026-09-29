@@ -15,6 +15,8 @@ class PrintCatalogService
             ->with([
                 'qualities' => fn (HasMany $query) => $query
                     ->where('enabled', true)
+                    ->orderBy('display_order')
+                    ->orderBy('id')
                     ->with(['pricingTiers' => fn (HasMany $tiers) => $tiers
                         ->where('enabled', true)
                         ->orderBy('min_quantity')]),

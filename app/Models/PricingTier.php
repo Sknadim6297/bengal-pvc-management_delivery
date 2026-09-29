@@ -8,13 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PricingTier extends Model
 {
     protected $fillable = [
-        'quality_id',
-        'min_quantity',
-        'max_quantity',
-        'base_unit_price',
-        'unit_price',
-        'discount_percent',
-        'enabled',
+        'quality_id', 'min_quantity', 'max_quantity', 'base_unit_price', 'unit_price', 'discount_percent', 'enabled',
     ];
 
     protected function casts(): array

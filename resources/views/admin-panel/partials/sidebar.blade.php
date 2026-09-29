@@ -10,6 +10,9 @@
 		</div>
 		<nav class="sidebar-menu">
 			<a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
+			<a href="{{ route('admin.pricing.edit') }}" class="{{ request()->routeIs('admin.pricing.*') ? 'active' : '' }}"><i class="bi bi-tags-fill"></i><span>Pricing Settings</span></a>
+			<a href="{{ route('admin.pvc-orders.index') }}" class="{{ request()->routeIs('admin.pvc-orders.*') ? 'active' : '' }}"><i class="bi bi-credit-card-2-front-fill"></i><span>PVC Orders</span></a>
+			<a href="{{ route('admin.photo-orders.index') }}" class="{{ request()->routeIs('admin.photo-orders.*') ? 'active' : '' }}"><i class="bi bi-image-fill"></i><span>Photo Orders</span></a>
 			<a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}"><i class="bi bi-people-fill"></i><span>All Users</span></a>
 			<form method="POST" action="{{ route('logout') }}">
 				@csrf
@@ -28,6 +31,9 @@
 		</div>
 		<nav class="sidebar-menu">
 			<a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
+			<a href="{{ route('admin.pricing.edit') }}" class="{{ request()->routeIs('admin.pricing.*') ? 'active' : '' }}"><i class="bi bi-tags-fill"></i><span>Pricing Settings</span></a>
+			<a href="{{ route('admin.pvc-orders.index') }}" class="{{ request()->routeIs('admin.pvc-orders.*') ? 'active' : '' }}"><i class="bi bi-credit-card-2-front-fill"></i><span>PVC Orders</span></a>
+			<a href="{{ route('admin.photo-orders.index') }}" class="{{ request()->routeIs('admin.photo-orders.*') ? 'active' : '' }}"><i class="bi bi-image-fill"></i><span>Photo Orders</span></a>
 			<a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}"><i class="bi bi-people-fill"></i><span>All Users</span></a>
 			<form method="POST" action="{{ route('logout') }}">
 				@csrf

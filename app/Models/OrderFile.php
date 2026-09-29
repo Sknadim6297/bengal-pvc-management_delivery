@@ -8,7 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OrderFile extends Model
 {
     protected $fillable = [
-        'type', 'original_name', 'storage_path', 'drive_url', 'file_size', 'mime_type', 'status',
+        'type',
+        'original_name',
+        'storage_path',
+        'drive_url',
+        'file_size',
+        'mime_type',
+        'status',
     ];
 
     protected function casts(): array

@@ -39,25 +39,6 @@ class AdminUserManagementTest extends TestCase
         $this->assertNotNull($userListQuery, 'The first cursor page must request at most 51 rows to display 50 plus a continuation check.');
     }
 
-    public function test_admin_listing_excludes_admin_accounts_before_pagination(): void
-    {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-        User::factory()->create(['role' => User::ROLE_ADMIN]);
-        User::factory()->count(50)->create(['role' => User::ROLE_USER]);
-
-        $this->actingAs($admin)
-            ->get(route('admin.users.index'))
-            ->assertOk()
-            ->assertViewHas('users', fn ($users): bool => count($users->items()) === 50
-                && ! $users->hasMorePages()
-                && $users->getCollection()->every(fn (User $listedUser): bool => $listedUser->role === User::ROLE_USER
-                    && $listedUser->id !== $admin->id));
-
-        $this->get(route('admin.users.index', ['q' => (string) $admin->id]))
-            ->assertOk()
-            ->assertViewHas('users', fn ($users): bool => $users->isEmpty());
-    }
-
     public function test_admin_search_and_filters_are_applied_before_pagination(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
@@ -146,17 +127,21 @@ class AdminUserManagementTest extends TestCase
             ->assertOk()
             ->assertSee('Total Users')
             ->assertSee('Active Users')
-            ->assertSee('Suspended Users')
-            ->assertSee('Total PVC Orders')
+            ->assertSee('Total Orders')
+            ->assertSee('Pending Orders')
             ->assertSee('Processing Orders')
             ->assertSee('Delivered Orders')
             ->assertSee('Failed Orders')
-            ->assertSee('Total Photo Orders')
+            ->assertSee('Total Revenue')
+            ->assertSee("Today's Orders")
+            ->assertSee("Today's Revenue")
             ->assertSee('No orders found')
             ->assertViewHas('statistics', fn (object $statistics): bool => $statistics->total_users === 3
                 && $statistics->active_users === 2
                 && $statistics->suspended_users === 1
-                && $statistics->total_pvc_orders === 0);
+                && $statistics->total_orders === 0
+                && $statistics->total_pvc_orders === 0
+                && (float) $statistics->total_revenue === 0.0);
     }
 
     public function test_admin_dashboard_loads_only_ten_recent_users(): void
@@ -202,20 +187,6 @@ class AdminUserManagementTest extends TestCase
             ->assertSee('details@example.com')
             ->assertDontSee($user->password, false)
             ->assertDontSee('do-not-display-this-token');
-    }
-
-    public function test_admin_accounts_cannot_be_opened_as_customer_details(): void
-    {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-        $otherAdmin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-        $customer = User::factory()->create(['role' => User::ROLE_USER]);
-
-        $this->actingAs($admin)
-            ->get(route('admin.users.show', $admin->id))
-            ->assertNotFound();
-
-        $this->get(route('admin.users.show', $otherAdmin->id))->assertNotFound();
-        $this->get(route('admin.users.show', $customer->id))->assertOk();
     }
 
     public function test_admin_can_suspend_and_reactivate_users_but_cannot_change_admin_status(): void

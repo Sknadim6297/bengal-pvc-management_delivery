@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Order;
 use App\Services\AdminDashboardStatistics;
 use App\Services\UserDashboardStatistics;
 use Illuminate\Support\Facades\Auth;
@@ -14,11 +15,15 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        abort_unless($user instanceof User, 401);
-
         return view('user-panel.dashboard', [
             'user' => $user,
             'statistics' => UserDashboardStatistics::forUser($user),
+            'recentOrders' => Order::query()
+                ->select(['id', 'user_id', 'order_number', 'service_type', 'status', 'quantity', 'created_at'])
+                ->where('user_id', $user->id)
+                ->latest('created_at')
+                ->limit(5)
+                ->get(),
         ]);
     }
 
@@ -27,6 +32,13 @@ class DashboardController extends Controller
         return view('admin-panel.dashboard', [
             'user' => Auth::user(),
             'statistics' => AdminDashboardStatistics::remember(),
+            'recentOrders' => Order::query()
+                ->select(['id', 'user_id', 'order_number', 'service_type', 'status', 'created_at'])
+                ->with('user:id,name')
+                ->latest('created_at')
+                ->latest('id')
+                ->limit(10)
+                ->get(),
             'recentUsers' => User::query()
                 ->select(['id', 'name', 'email', 'whatsapp_number', 'status', 'created_at'])
                 ->where('role', User::ROLE_USER)

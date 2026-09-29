@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PrintQuality extends Model
 {
-    protected $fillable = ['service_id', 'slug', 'name', 'description', 'enabled'];
+    protected $fillable = ['service_id', 'slug', 'name', 'description', 'enabled', 'display_order'];
 
     protected function casts(): array
     {
-        return ['enabled' => 'boolean'];
+        return ['enabled' => 'boolean', 'display_order' => 'integer'];
     }
 
     public function service(): BelongsTo

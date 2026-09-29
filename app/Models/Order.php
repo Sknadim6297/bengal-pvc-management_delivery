@@ -20,10 +20,43 @@ class Order extends Model
     public const STATUS_FAILED = 'failed';
     public const STATUS_CANCELLED = 'cancelled';
 
+    public const STATUSES = [
+        self::STATUS_PENDING,
+        self::STATUS_PAYMENT_PENDING,
+        self::STATUS_CONFIRMED,
+        self::STATUS_PROCESSING,
+        self::STATUS_PRINTING,
+        self::STATUS_PACKED,
+        self::STATUS_SHIPPED,
+        self::STATUS_OUT_FOR_DELIVERY,
+        self::STATUS_DELIVERED,
+        self::STATUS_FAILED,
+        self::STATUS_CANCELLED,
+    ];
+
+    public const ACTIVE_CARD_STATUSES = [
+        self::STATUS_CONFIRMED,
+        self::STATUS_PROCESSING,
+        self::STATUS_PRINTING,
+        self::STATUS_PACKED,
+        self::STATUS_SHIPPED,
+        self::STATUS_OUT_FOR_DELIVERY,
+    ];
+
     protected $fillable = [
-        'user_id', 'order_number', 'service_type', 'status', 'payment_status', 'quantity',
-        'subtotal', 'discount_amount', 'cover_amount', 'shipping_amount', 'coupon_discount',
-        'total_amount', 'delivery_address', 'submission_key',
+        'order_number',
+        'service_type',
+        'status',
+        'payment_status',
+        'quantity',
+        'subtotal',
+        'discount_amount',
+        'cover_amount',
+        'shipping_amount',
+        'coupon_discount',
+        'total_amount',
+        'delivery_address',
+        'submission_key',
     ];
 
     protected function casts(): array
@@ -79,7 +112,7 @@ class Order extends Model
 
     public function statusHistory(): HasMany
     {
-        return $this->hasMany(OrderStatusHistory::class)->orderBy('created_at');
+        return $this->hasMany(OrderStatusHistory::class)->orderBy('created_at')->orderBy('id');
     }
 
     public function payments(): HasMany

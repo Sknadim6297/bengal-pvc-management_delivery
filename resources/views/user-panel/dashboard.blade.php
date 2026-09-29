@@ -107,18 +107,29 @@
 
                                 <i class="bi bi-broadcast"></i>
 
-                                Live Order Feed
+                                Recent Order Activity
 
                             </div>
 
-                            <span class="real-time">REAL-TIME
+                            <span class="real-time">LATEST
                             </span>
 
                         </div>
 
 
                         <div class="feed-box">
-                            <div class="text-center text-muted py-4" role="status">No live orders yet</div>
+                            @forelse ($recentOrders as $recentOrder)
+                                <a href="{{ route('user.orders.show', $recentOrder->id) }}" class="order-item text-decoration-none">
+                                    <div class="order-avatar"><i class="bi bi-credit-card-2-front-fill" aria-hidden="true"></i></div>
+                                    <div class="order-info">
+                                        <strong>{{ $recentOrder->order_number }} · {{ $recentOrder->quantity }} {{ $recentOrder->service_type === 'photo-print' ? ($recentOrder->quantity === 1 ? 'photo' : 'photos') : ($recentOrder->quantity === 1 ? 'card' : 'cards') }}</strong>
+                                        <div class="order-meta"><i class="bi bi-calendar3" aria-hidden="true"></i> {{ $recentOrder->created_at?->format('Y-m-d H:i') }}</div>
+                                    </div>
+                                    <span class="order-status">{{ ucfirst(str_replace('_', ' ', $recentOrder->status)) }}</span>
+                                </a>
+                            @empty
+                                <div class="text-center text-muted py-4" role="status">No live orders yet</div>
+                            @endforelse
                         </div>
 
                     </div>

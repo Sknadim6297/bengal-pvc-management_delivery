@@ -8,8 +8,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OrderItem extends Model
 {
     protected $fillable = [
-        'quality_slug', 'quality_name', 'option_slug', 'quantity', 'base_unit_price', 'unit_price',
-        'discount_percent', 'discount_amount', 'subtotal', 'cover_selected', 'cover_unit_price', 'cover_total',
+        'quality_slug',
+        'quality_name',
+        'option_slug',
+        'quantity',
+        'base_unit_price',
+        'unit_price',
+        'discount_percent',
+        'discount_amount',
+        'subtotal',
+        'cover_selected',
+        'cover_unit_price',
+        'cover_total',
     ];
 
     protected function casts(): array
