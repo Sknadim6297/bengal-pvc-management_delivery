@@ -1,0 +1,554 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>India PVC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link href="style.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+        rel="stylesheet">
+</head>
+<body>
+    <header class="top-header">
+
+        <div class="container-fluid px-3 px-lg-5">
+
+            <div class="d-flex align-items-center justify-content-between">
+
+                <!-- Mobile Menu -->
+                <button class="mobile-menu-btn me-2"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#mobileSidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <!-- Logo -->
+                <a href="#" class="brand me-auto">
+
+                    <!-- Replace with your logo -->
+                    <img src=""
+                        class="brand-logo"
+                        alt="Bengal PVC">
+
+                    <div class="brand-name">
+                        India <span>PVC</span>
+                    </div>
+
+                </a>
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="help-box">
+                        <i class="bi bi-headset"></i>
+                        Helpline: +91 8900162634
+                    </div>
+
+                    <div class="user-box">
+                        <i class="bi bi-person"></i>
+                        raj chak
+                    </div>
+
+                    <button class="logout-btn">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+     MOBILE SIDEBAR
+========================= -->
+
+    <div class="offcanvas offcanvas-start"
+        tabindex="-1"
+        id="mobileSidebar">
+
+        <div class="offcanvas-header border-bottom">
+
+            <h5 class="fw-bold mb-0">User Panel
+            </h5>
+
+            <button type="button"
+                class="btn-close"
+                data-bs-dismiss="offcanvas">
+            </button>
+
+        </div>
+
+        <div class="offcanvas-body p-0">
+
+            <div class="sidebar-user">
+                <small>USER PANEL</small>
+                <h5>raj chak</h5>
+            </div>
+
+            <div class="sidebar-menu">
+
+                <a href="dashboard.html" class="active">
+                    <i class="bi bi-pie-chart-fill"></i>
+                    Dashboard
+                </a>
+
+                <a href="pvc-card-print.html">
+                    <i class="bi bi-credit-card-2-front-fill"></i>
+                    PVC Card Print
+                </a>
+
+                <a href="photo-print.html">
+                    <i class="bi bi-image"></i>
+                    Photo Print
+                </a>
+
+                <a href="recovered-failed-order.html">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Recover Failed Order
+                </a>
+
+                <a href="order-history.html">
+                    <i class="bi bi-clock-history"></i>
+                    Order History
+                </a>
+
+                <a href="track-help.html">
+                    <i class="bi bi-truck"></i>
+                    Track & Help
+                </a>
+
+                <a href="security.html">
+                    <i class="bi bi-shield-fill"></i>
+                    Security Settings
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- =========================
+     MAIN
+========================= -->
+
+    <div class="dashboard-wrapper">
+
+        <div class="container-fluid px-3 px-lg-5">
+
+            <div class="row g-4">
+
+                <!-- =========================
+                 DESKTOP SIDEBAR
+            ========================= -->
+
+                <div class="col-lg-3 col-xl-3 desktop-sidebar">
+
+                    <div class="sidebar">
+
+                        <div class="sidebar-user">
+
+                            <small>USER PANEL</small>
+
+                            <h5>raj chak</h5>
+
+                        </div>
+
+                        <div class="sidebar-menu">
+
+                            <a href="dashboard.html" class="active">
+                                <i class="bi bi-speedometer2"></i>
+                                <span>Dashboard</span>
+                            </a>
+
+                            <a href="pvc-card-print.html">
+                                <i class="bi bi-credit-card-2-front-fill"></i>
+                                <span>PVC Card Print</span>
+                            </a>
+
+                            <a href="photo-print.html">
+                                <i class="bi bi-image-fill"></i>
+                                <span>Photo Print</span>
+                            </a>
+
+                            <a href="recover-failed-order.html">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <span>Recover Failed Order</span>
+                            </a>
+
+                            <a href="order-history.html">
+                                <i class="bi bi-clock-history"></i>
+                                <span>Order History</span>
+                            </a>
+
+                            <a href="track-help.html">
+                                <i class="bi bi-truck"></i>
+                                <span>Track &amp; Help</span>
+                            </a>
+
+                            <a href="security.html">
+                                <i class="bi bi-shield-lock-fill"></i>
+                                <span>Security Settings</span>
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                 CONTENT
+            ========================= -->
+
+                <div class="col-lg-9 col-xl-9">
+
+                    <div class="main-card">
+
+                        <!-- HEADER -->
+                        <div class="mb-4">
+                            <h2 class="page-title">
+                                <i class="bi bi-images me-2 text-primary"></i>
+                                Custom Photo Print
+                            </h2>
+                            <hr />
+                        </div>
+
+
+                        <!-- PRICING -->
+                        <h4 class="section-title">Photo Print Pricing</h4>
+
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-md-6">
+                                <div class="price-card">
+
+                                    <div class="d-flex align-items-start gap-3">
+
+                                        <div class="price-icon">
+                                            <i class="bi bi-image"></i>
+                                        </div>
+
+                                        <div>
+                                            <h5 class="fw-bold mb-1">4x6 Inch (Standard)</h5>
+
+                                            <p class="text-muted small mb-3">
+                                                Lab Quality • Glossy • 300 GSM
+                                            </p>
+
+                                            <div class="price">120 / photo</div>
+
+                                            <small class="text-muted">Shipping: 50
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-6">
+                                <div class="price-card">
+
+                                    <div class="d-flex align-items-start gap-3">
+
+                                        <div class="price-icon">
+                                            <i class="bi bi-file-earmark-image"></i>
+                                        </div>
+
+                                        <div>
+                                            <h5 class="fw-bold mb-1">A4 Size (8x12)</h5>
+
+                                            <p class="text-muted small mb-3">
+                                                Premium Photo Print • Large Format
+                                            </p>
+
+                                            <div class="price">240 / photo</div>
+
+                                            <small class="text-muted">Shipping: 50
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <!-- SELECT SIZE -->
+                        <div class="mb-4">
+
+                            <h4 class="section-title">Select Photo Size</h4>
+
+                            <div class="row g-3">
+
+                                <div class="col-6">
+
+                                    <label class="size-option w-100">
+
+                                        <input type="radio"
+                                            name="photoSize"
+                                            value="4x6"
+                                            checked
+                                            onchange="calculateTotal()">
+
+                                        <div class="size-box">
+                                            <i class="bi bi-image"></i>
+                                            4x6 Inch
+                            <small class="d-block text-muted mt-1">120 / photo
+                            </small>
+                                        </div>
+
+                                    </label>
+
+                                </div>
+
+
+                                <div class="col-6">
+
+                                    <label class="size-option w-100">
+
+                                        <input type="radio"
+                                            name="photoSize"
+                                            value="a4"
+                                            onchange="calculateTotal()">
+
+                                        <div class="size-box">
+                                            <i class="bi bi-file-earmark-image"></i>
+                                            A4 Size
+                            <small class="d-block text-muted mt-1">240 / photo
+                            </small>
+                                        </div>
+
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PHOTO UPLOAD -->
+                        <div class="mb-4">
+
+                            <h4 class="section-title">Upload Photos</h4>
+
+                            <label for="photoUpload" class="upload-box w-100">
+
+                                <i class="bi bi-cloud-arrow-up-fill"></i>
+
+                                <h5 class="fw-bold mt-3 mb-1">Click or Drag Photos here
+                                </h5>
+
+                                <p class="text-muted mb-0">
+                                    JPG, PNG accepted • High resolution recommended • Max 80MB total
+                                </p>
+
+                            </label>
+
+                            <input type="file"
+                                id="photoUpload"
+                                class="d-none"
+                                accept=".jpg,.jpeg,.png"
+                                multiple
+                                onchange="calculateTotal()">
+                        </div>
+
+
+                        <!-- DRIVE -->
+                        <div class="inner-box mb-4">
+
+                            <h4 class="section-title">
+                                <i class="bi bi-google me-2"></i>
+                                Or Add Google Drive Photo Links
+                            </h4>
+
+                            <p class="text-muted">
+                                Paste Drive links for photos. Mix uploads + links allowed.
+                            </p>
+
+                            <div id="driveLinks">
+
+                                <div class="input-group mb-2">
+
+                                    <input type="url"
+                                        class="form-control drive-link"
+                                        placeholder="https://drive.google.com/..."
+                                        oninput="calculateTotal()">
+
+                                    <button type="button"
+                                        class="btn btn-outline-primary"
+                                        onclick="addDriveLink()">
+
+                                        <i class="bi bi-plus-lg"></i>
+                                        Add
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ADDRESS -->
+                        <div class="inner-box mb-4">
+
+                            <div class="d-flex flex-column flex-sm-row justify-content-between
+                        align-items-sm-center gap-2 mb-3">
+
+                                <h4 class="section-title mb-0">
+                                    <i class="bi bi-geo-alt-fill me-2 text-primary"></i>
+                                    Delivery Address (for Photos)
+                                </h4>
+
+                                <button type="button"
+                                    class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>
+                                    Load Saved Address
+                                </button>
+
+                            </div>
+
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <input type="text"
+                                        class="form-control"
+                                        placeholder="Village / Area / Street">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input type="text"
+                                        class="form-control"
+                                        placeholder="Landmark (Optional)">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input type="text"
+                                        class="form-control"
+                                        placeholder="Post Office">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input type="text"
+                                        class="form-control"
+                                        placeholder="Police Station">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input type="text"
+                                        class="form-control"
+                                        placeholder="PIN Code"
+                                        maxlength="6">
+                                </div>
+
+                                <div class="col-md-6">
+
+                                    <select class="form-select">
+                                        <option value="">Select District</option>
+                                        <option>Kolkata</option>
+                                        <option>Howrah</option>
+                                        <option>Hooghly</option>
+                                        <option>North 24 Parganas</option>
+                                        <option>South 24 Parganas</option>
+                                        <option>Purba Medinipur</option>
+                                        <option>Paschim Medinipur</option>
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- SUMMARY -->
+                        <div class="summary-card">
+
+                            <h4 class="section-title">Order Summary
+                            </h4>
+
+                            <div class="summary-row">
+                                <span>Total Photos:</span>
+                                <strong id="totalPhotos">0</strong>
+                            </div>
+
+                            <div class="summary-row">
+                                <span>Rate:</span>
+                                <strong id="rateText">120 / photo 4x6</strong>
+                            </div>
+
+                            <div class="summary-row">
+                                <span>Shipping:</span>
+                                <strong id="shippingText">0</strong>
+                            </div>
+
+
+                            <div class="total-area d-flex justify-content-between align-items-end">
+
+                                <div class="total-label">
+                                    TOTAL PAYABLE
+                                </div>
+
+                                <div class="total-price" id="totalPrice">
+                                    0
+                                </div>
+
+                            </div>
+
+
+                            <div class="d-grid mt-4">
+
+                                <button type="button" class="pay-btn">
+
+                                    <i class="bi bi-shield-check me-2"></i>
+
+                                    PAY &amp; ORDER PHOTOS
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- =========================
+     WHATSAPP
+========================= -->
+
+    <div class="whatsapp-floating">
+
+        <a href="https://wa.me/919XXXXXXXXX"
+            target="_blank">
+
+            <i class="bi bi-whatsapp"></i>
+
+        </a>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

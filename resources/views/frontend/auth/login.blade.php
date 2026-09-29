@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>India PVC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ asset('assets/style.css') }}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f7fb;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #20233f;
+        }
+
+
+
+        /* ================= LOGIN AREA ================= */
+
+        .login-section {
+            min-height: calc(100vh - 66px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 35px 15px;
+        }
+
+
+        /* ================= LOGIN CARD ================= */
+
+        .login-card {
+            width: 100%;
+            max-width: 448px;
+            background: #fff;
+            border: 1px solid #e0e3e8;
+            border-radius: 25px;
+            padding: 42px 40px;
+            box-shadow: 0 15px 35px rgba(20, 30, 50, .12);
+        }
+
+
+        .login-title {
+            text-align: center;
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #202047;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: #697287;
+            font-size: 15px;
+            margin-bottom: 36px;
+        }
+
+
+        /* ================= FORM ================= */
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #394257;
+            margin-bottom: 7px;
+        }
+
+        .form-control {
+            height: 51px;
+            border: 1px solid #cdd3dc;
+            border-radius: 11px;
+            padding: 0 15px;
+            font-size: 15px;
+            box-shadow: none;
+        }
+
+            .form-control:focus {
+                border-color: #5046e5;
+                box-shadow: 0 0 0 3px rgba(80,70,229,.10);
+            }
+
+
+        /* ================= LOGIN BUTTON ================= */
+
+        .login-btn {
+            width: 100%;
+            height: 56px;
+            border: none;
+            border-radius: 11px;
+            background: #5046e5;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            margin-top: 5px;
+            box-shadow: 0 7px 15px rgba(80,70,229,.22);
+            transition: .2s;
+        }
+
+            .login-btn:hover {
+                background: #4238d1;
+                transform: translateY(-1px);
+            }
+
+
+        /* ================= REGISTER TEXT ================= */
+
+        .new-customer {
+            text-align: center;
+            margin-top: 34px;
+            margin-bottom: 0;
+            color: #596276;
+            font-size: 15px;
+        }
+
+            .new-customer a {
+                color: #5046e5;
+                font-weight: 700;
+                text-decoration: none;
+            }
+
+                .new-customer a:hover {
+                    text-decoration: underline;
+                }
+
+
+        /* ================= WHATSAPP ================= */
+
+        .whatsapp-floating {
+            position: fixed;
+            right: 25px;
+            bottom: 22px;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: #16c96b;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 31px;
+            text-decoration: none;
+            box-shadow: 0 7px 18px rgba(0,0,0,.15);
+            z-index: 1000;
+        }
+
+            .whatsapp-floating:hover {
+                background: #12aa59;
+                color: #fff;
+                transform: scale(1.05);
+            }
+
+        .login {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 24px;
+            min-width: 100px;
+            /*background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: #fff;*/
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.25);
+            transition: all 0.3s ease;
+            margin-right: 4px;
+        }
+
+
+            .login:active {
+                transform: translateY(0);
+            }
+
+        @media (max-width: 575.98px) {
+            .login {
+                padding: 8px 18px;
+                min-width: 85px;
+                font-size: 14px;
+                border-radius: 8px;
+            }
+        }
+        /* ================= TABLET ================= */
+
+        @media (max-width: 767.98px) {
+
+            .main-header {
+                height: auto;
+                padding: 11px 0;
+            }
+
+            .brand-logo {
+                width: 34px;
+                height: 34px;
+            }
+
+            .brand-name {
+                font-size: 19px;
+            }
+
+            .login-link {
+                margin-right: 12px;
+                font-size: 14px;
+            }
+
+            .register-btn {
+                padding: 9px 14px;
+                border-radius: 9px;
+                font-size: 13px;
+            }
+
+
+            .login-section {
+                min-height: calc(100vh - 60px);
+                padding: 25px 15px;
+                align-items: center;
+            }
+
+
+            .login-card {
+                max-width: 100%;
+                padding: 32px 25px;
+                border-radius: 20px;
+            }
+
+
+            .login-title {
+                font-size: 27px;
+            }
+
+            .login-subtitle {
+                font-size: 14px;
+                margin-bottom: 28px;
+            }
+
+
+            .form-control {
+                height: 49px;
+            }
+
+
+            .login-btn {
+                height: 53px;
+            }
+
+
+            .new-customer {
+                margin-top: 28px;
+                font-size: 14px;
+            }
+
+
+            .whatsapp-floating {
+                width: 55px;
+                height: 55px;
+                right: 18px;
+                bottom: 18px;
+                font-size: 26px;
+            }
+        }
+
+
+        /* ================= SMALL MOBILE ================= */
+
+        @media (max-width: 400px) {
+
+            .login-card {
+                padding: 28px 20px;
+            }
+
+            .login-title {
+                font-size: 25px;
+            }
+
+            .login-subtitle {
+                margin-bottom: 25px;
+            }
+
+            .brand-name {
+                font-size: 18px;
+            }
+
+            .register-btn {
+                padding: 8px 12px;
+            }
+        }
+    </style>
+
+</head>
+<body>
+    <header class="main-header">
+
+        <div class="container">
+
+            <div class="d-flex align-items-center justify-content-between">
+
+                <!-- LOGO -->
+                <a href="{{ route('home') }}" class="brand-area">
+
+                    <img src="{{ asset('assets/img/pvc_logo.png') }}"
+                        class="brand-logo"
+                        alt="Bengal PVC">
+
+                    <div class="brand-name">
+                        India <span>PVC</span>
+                    </div>
+
+                </a>
+
+
+                <!-- RIGHT -->
+                <div class="d-flex align-items-center">
+
+                    <a href="{{ route('login') }}" class="login">Login
+                </a>
+
+                    <a href="{{ route('register') }}" class="register-btn">Register
+                </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <section class="login-section">
+
+        <div class="login-card">
+
+
+            <h1 class="login-title">Welcome Back
+        </h1>
+
+
+            <p class="login-subtitle">
+                Secure Login to India PVC
+       
+            </p>
+
+
+            @if ($errors->any())
+                <div class="alert alert-danger" role="alert">
+                    @foreach ($errors->all() as $error)
+                        <div>{{ $error }}</div>
+                    @endforeach
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('login.authenticate') }}">
+                @csrf
+
+
+                <!-- WHATSAPP / EMAIL -->
+
+                <div class="mb-4">
+
+                    <label class="form-label" for="login">
+                        WhatsApp or Email
+               
+                    </label>
+
+                    <input id="login" name="login" type="text"
+                        class="form-control"
+                        value="{{ old('login') }}"
+                        placeholder=""
+                        autocomplete="username"
+                        required>
+                    @error('login')
+                        <div class="text-danger small mt-2">{{ $message }}</div>
+                    @enderror
+                </div>
+
+
+
+                <!-- PASSWORD -->
+
+                <div class="mb-4">
+
+                    <label class="form-label" for="password">
+                        Password
+               
+                    </label>
+
+                    <input id="password" name="password" type="password"
+                        class="form-control"
+                        placeholder=""
+                        autocomplete="current-password"
+                        required>
+                    @error('password')
+                        <div class="text-danger small mt-2">{{ $message }}</div>
+                    @enderror
+                </div>
+
+
+
+                <!-- LOGIN -->
+
+                <button type="submit"
+                    class="login-btn">
+                    Login to Dashboard
+                </button>
+
+
+            </form>
+
+
+
+            <!-- REGISTER -->
+
+            <p class="new-customer">
+                New customer?
+
+           
+
+                <a href="{{ route('register') }}">Create an account
+            </a>
+
+            </p>
+
+
+        </div>
+
+    </section>
+
+    <a href="https://wa.me/919XXXXXXXXX"
+        class="whatsapp-floating"
+        target="_blank">
+
+        <i class="bi bi-whatsapp"></i>
+
+    </a>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
