@@ -7,7 +7,7 @@
 
                         <!-- Welcome -->
 
-                        <h1 class="welcome-title">Welcome, <span>raj chak!</span>
+                        <h1 class="welcome-title">Welcome, <span>{{ $user->name ?: 'User' }}!</span>
                         </h1>
 
 
@@ -28,7 +28,7 @@
                                         </div>
 
                                         <div class="stat-number">
-                                            0
+                                            {{ number_format($statistics->processing_cards) }}
                                         </div>
 
                                     </div>
@@ -55,7 +55,7 @@
                                         </div>
 
                                         <div class="stat-number">
-                                            0
+                                            {{ number_format($statistics->delivered_cards) }}
                                         </div>
 
                                     </div>
@@ -75,22 +75,26 @@
 
                         <div class="action-buttons">
 
-                            <button class="action-btn">
+                            <a href="{{ route('user.pvc-card-print') }}" class="action-btn text-decoration-none d-flex align-items-center">
 
                                 <i class="bi bi-plus-circle-fill"></i>
 
                                 Start a New Order
 
-                            </button>
+                            </a>
 
 
-                            <button class="action-btn">
-
-                                <i class="bi bi-megaphone-fill"></i>
-
-                                Join Whatsapp Channel
-
-                            </button>
+                            @if (filled(config('services.whatsapp_channel_url')))
+                                <a class="action-btn text-decoration-none d-flex align-items-center" href="{{ config('services.whatsapp_channel_url') }}" target="_blank" rel="noopener noreferrer">
+                                    <i class="bi bi-megaphone-fill"></i>
+                                    Join Whatsapp Channel
+                                </a>
+                            @else
+                                <button class="action-btn" type="button" disabled aria-disabled="true" title="WhatsApp channel link is not configured">
+                                    <i class="bi bi-megaphone-fill"></i>
+                                    Join Whatsapp Channel
+                                </button>
+                            @endif
 
                         </div>
 
@@ -114,92 +118,7 @@
 
 
                         <div class="feed-box">
-
-                            <!-- Order -->
-
-                            <div class="order-item">
-
-                                <div class="order-avatar">
-                                    D
-                                </div>
-
-                                <div class="order-info">
-
-                                    <strong>Dipen Samanta ordered 11 cards
-                                    </strong>
-
-                                    <div class="order-meta">
-
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                        Purba Medinipur
-                                    &nbsp; • &nbsp;
-                                    07:33 pm
-
-                                    </div>
-
-                                </div>
-
-                                <span class="order-status">PRINTING
-                                </span>
-
-                            </div>
-
-
-                            <div class="order-item">
-
-                                <div class="order-avatar">
-                                    A
-                                </div>
-
-                                <div class="order-info">
-
-                                    <strong>Amit Das ordered 5 cards
-                                    </strong>
-
-                                    <div class="order-meta">
-
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                        Kolkata
-                                    &nbsp; • &nbsp;
-                                    07:25 pm
-
-                                    </div>
-
-                                </div>
-
-                                <span class="order-status">PRINTING
-                                </span>
-
-                            </div>
-
-
-                            <div class="order-item">
-
-                                <div class="order-avatar">
-                                    S
-                                </div>
-
-                                <div class="order-info">
-
-                                    <strong>Sujoy Roy ordered 8 cards
-                                    </strong>
-
-                                    <div class="order-meta">
-
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                        Howrah
-                                    &nbsp; • &nbsp;
-                                    07:18 pm
-
-                                    </div>
-
-                                </div>
-
-                                <span class="order-status">PRINTING
-                                </span>
-
-                            </div>
-
+                            <div class="text-center text-muted py-4" role="status">No live orders yet</div>
                         </div>
 
                     </div>

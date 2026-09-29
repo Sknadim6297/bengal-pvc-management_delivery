@@ -35,4 +35,7 @@ return [
         ],
     ],
 
+    'whatsapp_channel_url' => env('WHATSAPP_CHANNEL_URL'),
+    'whatsapp_contact_url' => env('WHATSAPP_CONTACT_URL'),
+
 ];

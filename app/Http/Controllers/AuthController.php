@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use App\Services\AdminDashboardStatistics;
 use App\Support\IndianPhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -75,6 +76,7 @@ class AuthController extends Controller
         $validated = $request->validated();
 
         $user = User::create($validated);
+        AdminDashboardStatistics::forget();
         $user->forceFill([
             'role' => User::ROLE_USER,
             'status' => User::STATUS_ACTIVE,

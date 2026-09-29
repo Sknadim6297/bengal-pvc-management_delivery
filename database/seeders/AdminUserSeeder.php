@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use App\Services\AdminDashboardStatistics;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -31,5 +32,7 @@ class AdminUserSeeder extends Seeder
             'role' => User::ROLE_ADMIN,
             'status' => User::STATUS_ACTIVE,
         ])->save();
+
+        AdminDashboardStatistics::forget();
     }
 }

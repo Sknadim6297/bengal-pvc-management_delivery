@@ -35,12 +35,15 @@
 
                     <div class="user-box">
                         <i class="bi bi-person"></i>
-                        raj chak
+                        {{ auth()->user()?->name ?? 'User' }}
                     </div>
 
-                    <button class="logout-btn">
-                        <i class="bi bi-box-arrow-right"></i>
-                    </button>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="logout-btn" type="submit" aria-label="Logout" title="Logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    </form>
 
                 </div>
 

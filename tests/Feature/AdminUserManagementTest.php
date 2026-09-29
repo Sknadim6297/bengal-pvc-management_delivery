@@ -3,9 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Services\AdminDashboardStatistics;
+use Database\Seeders\ScaleTestUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
+use RuntimeException;
 use Tests\TestCase;
 
 class AdminUserManagementTest extends TestCase
@@ -33,6 +37,25 @@ class AdminUserManagementTest extends TestCase
         });
 
         $this->assertNotNull($userListQuery, 'The first cursor page must request at most 51 rows to display 50 plus a continuation check.');
+    }
+
+    public function test_admin_listing_excludes_admin_accounts_before_pagination(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        User::factory()->create(['role' => User::ROLE_ADMIN]);
+        User::factory()->count(50)->create(['role' => User::ROLE_USER]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertViewHas('users', fn ($users): bool => count($users->items()) === 50
+                && ! $users->hasMorePages()
+                && $users->getCollection()->every(fn (User $listedUser): bool => $listedUser->role === User::ROLE_USER
+                    && $listedUser->id !== $admin->id));
+
+        $this->get(route('admin.users.index', ['q' => (string) $admin->id]))
+            ->assertOk()
+            ->assertViewHas('users', fn ($users): bool => $users->isEmpty());
     }
 
     public function test_admin_search_and_filters_are_applied_before_pagination(): void
@@ -76,19 +99,93 @@ class AdminUserManagementTest extends TestCase
             ->assertDontSee('south.customer@example.com');
     }
 
+    public function test_admin_user_list_shows_only_the_search_controls(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertSee('Search ID, name, email, WhatsApp or district')
+            ->assertSee('admin-table')
+            ->assertDontSee('id="role"', false)
+            ->assertDontSee('id="status"', false)
+            ->assertDontSee('id="from"', false)
+            ->assertDontSee('id="to"', false)
+            ->assertDontSee('id="sort"', false)
+            ->assertDontSee('id="direction"', false);
+    }
+
+    public function test_admin_search_supports_user_id_district_and_whatsapp(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $user = User::factory()->create([
+            'name' => 'Field Search Customer',
+            'email' => 'field.customer@example.com',
+            'whatsapp_number' => '919876543210',
+            'district' => 'Kolkata',
+        ]);
+
+        foreach ([(string) $user->id, 'Kolkata', '919876543210'] as $term) {
+            $this->actingAs($admin)
+                ->get(route('admin.users.index', ['q' => $term]))
+                ->assertOk()
+                ->assertSee('field.customer@example.com');
+        }
+    }
+
     public function test_admin_dashboard_uses_database_aggregates(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         User::factory()->count(2)->create(['status' => User::STATUS_ACTIVE]);
         User::factory()->create(['status' => User::STATUS_SUSPENDED]);
+        Cache::forget(AdminDashboardStatistics::CACHE_KEY);
 
         $this->actingAs($admin)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Total Accounts')
-            ->assertSee('Registered Users')
+            ->assertSee('Total Users')
             ->assertSee('Active Users')
-            ->assertSee('4');
+            ->assertSee('Suspended Users')
+            ->assertSee('Total PVC Orders')
+            ->assertSee('Processing Orders')
+            ->assertSee('Delivered Orders')
+            ->assertSee('Failed Orders')
+            ->assertSee('Total Photo Orders')
+            ->assertSee('No orders found')
+            ->assertViewHas('statistics', fn (object $statistics): bool => $statistics->total_users === 3
+                && $statistics->active_users === 2
+                && $statistics->suspended_users === 1
+                && $statistics->total_pvc_orders === 0);
+    }
+
+    public function test_admin_dashboard_loads_only_ten_recent_users(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        User::factory()->count(12)->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertViewHas('recentUsers', fn ($users): bool => $users->count() === 10);
+    }
+
+    public function test_admin_dashboard_reuses_aggregate_cache(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        Cache::forget(AdminDashboardStatistics::CACHE_KEY);
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
+        $this->get(route('admin.dashboard'))->assertOk();
+
+        $aggregateQueries = collect(DB::getQueryLog())->filter(
+            fn (array $query): bool => str_contains(strtolower($query['query']), 'count(*) as total_accounts'),
+        );
+
+        $this->assertCount(1, $aggregateQueries);
+        $this->assertTrue(Cache::has(AdminDashboardStatistics::CACHE_KEY));
     }
 
     public function test_user_details_never_expose_password_or_remember_token(): void
@@ -107,11 +204,26 @@ class AdminUserManagementTest extends TestCase
             ->assertDontSee('do-not-display-this-token');
     }
 
+    public function test_admin_accounts_cannot_be_opened_as_customer_details(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $otherAdmin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $customer = User::factory()->create(['role' => User::ROLE_USER]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.show', $admin->id))
+            ->assertNotFound();
+
+        $this->get(route('admin.users.show', $otherAdmin->id))->assertNotFound();
+        $this->get(route('admin.users.show', $customer->id))->assertOk();
+    }
+
     public function test_admin_can_suspend_and_reactivate_users_but_cannot_change_admin_status(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         $user = User::factory()->create(['role' => User::ROLE_USER]);
         $otherAdmin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        Cache::put(AdminDashboardStatistics::CACHE_KEY, (object) ['total_accounts' => 0], now()->addMinute());
 
         $this->actingAs($admin)
             ->from(route('admin.users.index'))
@@ -119,6 +231,7 @@ class AdminUserManagementTest extends TestCase
             ->assertRedirect(route('admin.users.index'));
 
         $this->assertDatabaseHas('users', ['id' => $user->id, 'status' => User::STATUS_SUSPENDED]);
+        $this->assertFalse(Cache::has(AdminDashboardStatistics::CACHE_KEY));
 
         $this->actingAs($admin)
             ->patch(route('admin.users.status', $otherAdmin->id), ['status' => User::STATUS_SUSPENDED])
@@ -165,11 +278,12 @@ class AdminUserManagementTest extends TestCase
         foreach ([
             'users_email_unique',
             'users_whatsapp_number_unique',
-            'users_role_status_index',
+            'users_role_status_id_index',
             'users_role_id_index',
             'users_status_id_index',
-            'users_name_index',
-            'users_created_at_index',
+            'users_name_id_index',
+            'users_district_id_index',
+            'users_created_at_id_index',
         ] as $indexName) {
             $this->assertContains($indexName, $indexNames);
         }
@@ -181,5 +295,13 @@ class AdminUserManagementTest extends TestCase
         $planDetails = implode(' ', array_map(fn ($row) => $row->detail, $queryPlan));
 
         $this->assertStringContainsString('users_whatsapp_number_unique', $planDetails);
+    }
+
+    public function test_million_row_seeder_refuses_the_regular_test_database(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Scale data can only be seeded');
+
+        (new ScaleTestUserSeeder)->run();
     }
 }

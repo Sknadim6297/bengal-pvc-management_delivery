@@ -24,11 +24,13 @@
         </div>
     </div>
 
-    <div class="whatsapp-floating">
-        <a href="https://wa.me/919XXXXXXXXX" target="_blank">
-            <i class="bi bi-whatsapp"></i>
-        </a>
-    </div>
+    @if (filled(config('services.whatsapp_contact_url')))
+        <div class="whatsapp-floating">
+            <a href="{{ config('services.whatsapp_contact_url') }}" target="_blank" rel="noopener noreferrer" aria-label="Contact Bengal PVC on WhatsApp">
+                <i class="bi bi-whatsapp"></i>
+            </a>
+        </div>
+    @endif
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')

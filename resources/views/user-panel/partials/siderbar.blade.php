@@ -15,11 +15,9 @@
         </div>
 
         <div class="offcanvas-body p-0">
-
-            <div class="sidebar-brand"><img src="{{ asset('assets/img/pvc_logo.png') }}" alt="India PVC"></div>
                         <div class="sidebar-user">
                 <small>USER PANEL</small>
-                <h5>raj chak</h5>
+                <h5>{{ auth()->user()?->name ?? 'User' }}</h5>
             </div>
 
             <div class="sidebar-menu">
@@ -67,13 +65,11 @@
 <div class="col-lg-3 col-xl-3 desktop-sidebar">
 
                     <div class="sidebar">
-
-                        <div class="sidebar-brand"><img src="{{ asset('assets/img/pvc_logo.png') }}" alt="India PVC"></div>
                         <div class="sidebar-user">
 
                             <small>USER PANEL</small>
 
-                            <h5>raj chak</h5>
+                            <h5>{{ auth()->user()?->name ?? 'User' }}</h5>
 
                         </div>
 

@@ -20,10 +20,12 @@ return new class extends Migration
 
         Schema::table('users', function (Blueprint $table) {
             $table->unique('whatsapp_number', 'users_whatsapp_number_unique');
+            $table->dropIndex('users_role_status_index');
+            $table->index(['role', 'status', 'id'], 'users_role_status_id_index');
             $table->index(['role', 'id'], 'users_role_id_index');
             $table->index(['status', 'id'], 'users_status_id_index');
-            $table->index('name', 'users_name_index');
-            $table->index('created_at', 'users_created_at_index');
+            $table->index(['name', 'id'], 'users_name_id_index');
+            $table->index(['created_at', 'id'], 'users_created_at_id_index');
         });
     }
 
@@ -31,10 +33,12 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropUnique('users_whatsapp_number_unique');
+            $table->dropIndex('users_role_status_id_index');
             $table->dropIndex('users_role_id_index');
             $table->dropIndex('users_status_id_index');
-            $table->dropIndex('users_name_index');
-            $table->dropIndex('users_created_at_index');
+            $table->dropIndex('users_name_id_index');
+            $table->dropIndex('users_created_at_id_index');
+            $table->index(['role', 'status'], 'users_role_status_index');
             $table->dropColumn(['whatsapp_number', 'district']);
         });
     }

@@ -479,13 +479,15 @@
 
     </section>
 
-    <a href="https://wa.me/919XXXXXXXXX"
-        class="whatsapp-floating"
-        target="_blank">
-
-        <i class="bi bi-whatsapp text-white"></i>
-
-    </a>
+    @if (filled(config('services.whatsapp_contact_url')))
+        <a href="{{ config('services.whatsapp_contact_url') }}"
+            class="whatsapp-floating"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Contact Bengal PVC on WhatsApp">
+            <i class="bi bi-whatsapp text-white"></i>
+        </a>
+    @endif
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

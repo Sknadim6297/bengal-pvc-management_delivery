@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use Database\Seeders\AdminUserSeeder;
 use App\Models\User;
+use App\Services\AdminDashboardStatistics;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -113,6 +115,8 @@ class AuthFlowTest extends TestCase
 
     public function test_registration_accepts_html_fields_without_confirmation_and_ignores_privileged_role(): void
     {
+        Cache::put(AdminDashboardStatistics::CACHE_KEY, (object) ['total_accounts' => 0], now()->addMinute());
+
         $this->post('/register', [
             'name' => 'Jane User',
             'whatsapp_number' => '+91 98765 43210',
@@ -134,6 +138,7 @@ class AuthFlowTest extends TestCase
         $storedPassword = User::where('email', 'jane@example.com')->value('password');
         $this->assertNotSame('SecurePass123!', $storedPassword);
         $this->assertTrue(password_verify('SecurePass123!', $storedPassword));
+        $this->assertFalse(Cache::has(AdminDashboardStatistics::CACHE_KEY));
     }
 
     public function test_registration_rejects_duplicate_emails_and_admin_role_input(): void
@@ -229,6 +234,28 @@ class AuthFlowTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_suspended_account_is_logged_out_on_its_next_request(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'suspend-during-session@example.com',
+            'password' => bcrypt('Password123!'),
+        ]);
+
+        $this->post('/login', [
+            'login' => 'suspend-during-session@example.com',
+            'password' => 'Password123!',
+        ])->assertRedirect('/dashboard');
+
+        User::whereKey($user->id)->update(['status' => User::STATUS_SUSPENDED]);
+        $this->app['auth']->forgetGuards();
+
+        $this->get('/dashboard')
+            ->assertRedirect('/login')
+            ->assertSessionHasErrors('login');
+
+        $this->assertGuest();
+    }
+
     public function test_login_attempts_are_rate_limited(): void
     {
         for ($attempt = 0; $attempt < 5; $attempt++) {
@@ -277,17 +304,117 @@ class AuthFlowTest extends TestCase
             'password' => bcrypt('Password123!'),
         ]);
 
+        $this->withSession(['private_marker' => 'clear-after-logout']);
         $this->post('/login', [
             'login' => 'user@example.com',
             'password' => 'Password123!',
         ])->assertRedirect('/dashboard');
 
         $this->assertAuthenticatedAs($user);
-        $this->get('/dashboard')->assertOk();
+        $this->get('/dashboard')
+            ->assertOk()
+            ->assertSee('method="POST" action="'.route('logout').'"', false)
+            ->assertSee('name="_token"', false)
+            ->assertSee(route('user.pvc-card-print'), false);
+
+        $logoutSessionId = session()->getId();
+        $this->post('/logout')->assertRedirect('/');
+        $this->assertGuest();
+        $this->assertNotSame($logoutSessionId, session()->getId());
+        $this->assertFalse(session()->has('private_marker'));
+        $this->get('/dashboard')->assertRedirect('/login');
+        $this->get('/logout')->assertStatus(405);
+    }
+
+    public function test_sequential_users_only_see_their_own_dashboard_identity_and_statistics(): void
+    {
+        $userA = User::factory()->create([
+            'name' => 'Account Alpha',
+            'email' => 'alpha@example.com',
+            'password' => bcrypt('Password123!'),
+        ]);
+        $userB = User::factory()->create([
+            'name' => 'Account Beta',
+            'email' => 'beta@example.com',
+            'password' => bcrypt('Password123!'),
+        ]);
+
+        $this->post('/login', [
+            'login' => $userA->email,
+            'password' => 'Password123!',
+        ])->assertRedirect('/dashboard');
+
+        $this->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Welcome, <span>Account Alpha!</span>', false)
+            ->assertSee('Account Alpha')
+            ->assertDontSee('Account Beta')
+            ->assertSee('No live orders yet')
+            ->assertSee(route('user.pvc-card-print'), false)
+            ->assertViewHas('statistics', fn (object $statistics): bool => $statistics->user_id === $userA->id
+                && $statistics->processing_cards === 0
+                && $statistics->delivered_cards === 0);
 
         $this->post('/logout')->assertRedirect('/');
         $this->assertGuest();
-        $this->get('/dashboard')->assertRedirect('/login');
+
+        $this->post('/login', [
+            'login' => $userB->email,
+            'password' => 'Password123!',
+        ])->assertRedirect('/dashboard');
+
+        $this->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Welcome, <span>Account Beta!</span>', false)
+            ->assertSee('Account Beta')
+            ->assertDontSee('Account Alpha')
+            ->assertViewHas('statistics', fn (object $statistics): bool => $statistics->user_id === $userB->id
+                && $statistics->processing_cards === 0
+                && $statistics->delivered_cards === 0);
+    }
+
+    public function test_production_pages_do_not_render_demo_order_names_or_placeholder_whatsapp_urls(): void
+    {
+        foreach (['/', '/login', '/register'] as $path) {
+            $this->get($path)
+                ->assertOk()
+                ->assertDontSee('Dipen Samanta')
+                ->assertDontSee('Amit Das')
+                ->assertDontSee('Sujoy Roy')
+                ->assertDontSee('RAKSHAKAR DAS')
+                ->assertDontSee('https://wa.me/919XXXXXXXXX');
+        }
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('No live orders yet')
+            ->assertDontSee('DEBASISH SAU')
+            ->assertDontSee('MD SANOWAR HOSSAIN PAIK')
+            ->assertDontSee('NAZIMUL ISLAM')
+            ->assertDontSee('Sinarul Saikh');
+
+        $user = User::factory()->create();
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertDontSee('Dipen Samanta')
+            ->assertDontSee('Amit Das')
+            ->assertDontSee('Sujoy Roy')
+            ->assertDontSee('https://wa.me/919XXXXXXXXX')
+            ->assertSee('Join Whatsapp Channel')
+            ->assertSee('disabled', false);
+    }
+
+    public function test_whatsapp_channel_action_uses_its_configured_url(): void
+    {
+        Config::set('services.whatsapp_channel_url', 'https://whatsapp.com/channel/test-channel');
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('href="https://whatsapp.com/channel/test-channel"', false)
+            ->assertSee('Join Whatsapp Channel');
     }
 
     public function test_login_regenerates_the_session_identifier(): void
@@ -336,13 +463,19 @@ class AuthFlowTest extends TestCase
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         User::factory()->count(2)->create(['status' => User::STATUS_ACTIVE]);
         User::factory()->create(['status' => User::STATUS_SUSPENDED]);
+        Cache::forget(AdminDashboardStatistics::CACHE_KEY);
 
         $this->actingAs($admin)
             ->get('/admin/dashboard')
             ->assertOk()
-            ->assertSee('Total Accounts')
-            ->assertSee('Registered Users')
-            ->assertSee('Active Users');
+            ->assertSee('Total Users')
+            ->assertSee('Active Users')
+            ->assertSee('Suspended Users')
+            ->assertSee('Recent Orders')
+            ->assertSee('Recent Users')
+            ->assertViewHas('statistics', fn (object $statistics): bool => $statistics->total_users === 3
+                && $statistics->active_users === 2
+                && $statistics->suspended_users === 1);
     }
 
     public function test_admin_seeder_is_configured_hashed_and_idempotent(): void

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\AdminDashboardStatistics;
+use App\Services\UserDashboardStatistics;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -10,22 +12,28 @@ class DashboardController extends Controller
 {
     public function user(): View
     {
+        $user = Auth::user();
+
+        abort_unless($user instanceof User, 401);
+
         return view('user-panel.dashboard', [
-            'user' => Auth::user(),
+            'user' => $user,
+            'statistics' => UserDashboardStatistics::forUser($user),
         ]);
     }
 
     public function admin(): View
     {
-        $statistics = User::query()
-            ->selectRaw('COUNT(*) as total_accounts')
-            ->selectRaw('SUM(CASE WHEN role = ? THEN 1 ELSE 0 END) as registered_users', [User::ROLE_USER])
-            ->selectRaw('SUM(CASE WHEN role = ? AND status = ? THEN 1 ELSE 0 END) as active_users', [User::ROLE_USER, User::STATUS_ACTIVE])
-            ->first();
-
         return view('admin-panel.dashboard', [
             'user' => Auth::user(),
-            'statistics' => $statistics,
+            'statistics' => AdminDashboardStatistics::remember(),
+            'recentUsers' => User::query()
+                ->select(['id', 'name', 'email', 'whatsapp_number', 'status', 'created_at'])
+                ->where('role', User::ROLE_USER)
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->limit(10)
+                ->get(),
         ]);
     }
 }
