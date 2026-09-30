@@ -41,21 +41,178 @@ class OrderLifecycleTest extends TestCase
             'mime_type' => 'application/pdf',
             'status' => 'received',
         ]);
+        $ownerOrder->status = Order::STATUS_PROCESSING;
+        $ownerOrder->payment_status = 'paid';
+        $ownerOrder->save();
+        $ownerOrder->statusHistory()->create([
+            'old_status' => Order::STATUS_PENDING,
+            'new_status' => Order::STATUS_PROCESSING,
+            'changed_by' => $owner->id,
+            'note' => 'Production started.',
+        ]);
+        $ownerOrder->payments()->create([
+            'gateway' => 'manual',
+            'transaction_id' => 'PAY-REFERENCE-123',
+            'amount' => '117.00',
+            'status' => 'paid',
+            'paid_at' => now(),
+        ]);
+        $longFilename = str_repeat('Technical_Project_Documentation_', 5).'.pdf';
+        $ownerOrder->files()->create([
+            'type' => 'pdf',
+            'original_name' => $longFilename,
+            'file_size' => 1024,
+            'mime_type' => 'application/pdf',
+            'status' => 'missing',
+        ]);
 
         $this->actingAs($owner)
             ->get(route('user.order-history'))
             ->assertOk()
             ->assertSee($ownerOrder->order_number)
+            ->assertSee('Payment')
+            ->assertSee('Processing')
+            ->assertSee('<table class="table order-history-table align-middle mb-0">', false)
+            ->assertSee('order-history-mobile-card', false)
+            ->assertSee(route('user.track-help', ['order_id' => $ownerOrder->order_number]), false)
             ->assertDontSee($otherOrder->order_number);
 
         $this->get(route('user.orders.show', $ownerOrder->id))
             ->assertOk()
+            ->assertSee('Order #'.$ownerOrder->order_number)
+            ->assertSee('Processing')
+            ->assertSee('Paid')
+            ->assertSee('Order Summary')
+            ->assertSee('₹117.00')
             ->assertSee('card.pdf')
-            ->assertSee('Status timeline');
+            ->assertSee($longFilename)
+            ->assertSee('Unavailable')
+            ->assertSee('Production started.')
+            ->assertSee('Status History')
+            ->assertSee(route('user.track-help', ['order_id' => $ownerOrder->order_number]), false)
+            ->assertSee('PAY-REFERENCE-123');
 
         $this->get(route('user.orders.show', $otherOrder->id))->assertNotFound();
         $this->get(route('user.orders.files.download', [$otherOrder->id, $file->id]))->assertNotFound();
         $this->get(route('user.orders.files.download', [$ownerOrder->id, $file->id]))->assertOk();
+    }
+
+    public function test_order_details_shows_truthful_empty_states_without_fabricating_history(): void
+    {
+        $user = User::factory()->create();
+        $order = $this->makeOrder($user);
+        $order->statusHistory()->delete();
+
+        $this->actingAs($user)
+            ->get(route('user.orders.show', $order->id))
+            ->assertOk()
+            ->assertSee('No documents attached to this order.')
+            ->assertSee('Payment pending')
+            ->assertSee('No payment has been recorded for this order yet.')
+            ->assertSee('No status history has been recorded for this order.')
+            ->assertDontSee('<article class="order-activity-item', false);
+    }
+
+    public function test_order_history_filters_dates_by_owner_and_preserves_pagination_parameters(): void
+    {
+        $owner = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $today = now()->startOfDay();
+        $inRangeOrder = null;
+        $outOfRangeOrder = null;
+
+        for ($index = 0; $index < 21; $index++) {
+            $order = $this->makeOrder($owner);
+            DB::table('orders')->where('id', $order->id)->update([
+                'created_at' => $index === 0 ? $today->copy()->subDay() : $today,
+            ]);
+            if ($index === 1) {
+                $inRangeOrder = $order;
+            }
+            if ($index === 0) {
+                $outOfRangeOrder = $order;
+            }
+        }
+
+        $otherOrder = $this->makeOrder($otherUser);
+        DB::table('orders')->where('id', $otherOrder->id)->update(['created_at' => $today]);
+        $filterDate = $today->toDateString();
+
+        $this->actingAs($owner)
+            ->get(route('user.order-history', ['from' => $filterDate, 'to' => $filterDate]))
+            ->assertOk()
+            ->assertSee($inRangeOrder->order_number)
+            ->assertDontSee($outOfRangeOrder->order_number)
+            ->assertDontSee($otherOrder->order_number)
+            ->assertViewHas('orders', function ($orders) use ($filterDate): bool {
+                parse_str(parse_url($orders->url(2), PHP_URL_QUERY) ?? '', $query);
+
+                return $orders->total() === 20
+                    && $orders->perPage() === 20
+                    && $query['from'] === $filterDate
+                    && $query['to'] === $filterDate;
+            });
+    }
+
+    public function test_order_history_displays_payment_and_fulfillment_status_separately(): void
+    {
+        $user = User::factory()->create();
+        $paidOrder = $this->makeOrder($user, Order::STATUS_PAYMENT_PENDING);
+        $paidOrder->payment_status = 'paid';
+        $paidOrder->save();
+
+        $this->actingAs($user)
+            ->get(route('user.order-history'))
+            ->assertOk()
+            ->assertSee('Paid')
+            ->assertSee('Awaiting Payment')
+            ->assertSee('Payment')
+            ->assertSee('Status');
+    }
+
+    public function test_order_history_shows_compact_empty_states(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('user.order-history'))
+            ->assertOk()
+            ->assertSee('No orders found')
+            ->assertSee('Your PVC card print orders will appear here.')
+            ->assertDontSee('<table class="table order-history-table', false);
+
+        $future = now()->addDay()->toDateString();
+        $this->get(route('user.order-history', ['from' => $future, 'to' => $future]))
+            ->assertOk()
+            ->assertSee('No orders found for the selected date range.')
+            ->assertSee('Clear filters');
+    }
+
+    public function test_invalid_order_history_filter_shows_one_toast(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->from(route('user.order-history'))
+            ->get(route('user.order-history', [
+                'from' => '2026-10-02',
+                'to' => '2026-10-01',
+            ]))
+            ->assertRedirect(route('user.order-history'))
+            ->assertSessionHasErrors('to');
+
+        $response = $this->get(route('user.order-history'));
+        $response->assertOk()->assertSee('toast-container');
+        $this->assertSame(1, substr_count($response->getContent(), 'role="alert"'));
+
+        $this->from(route('user.order-history'))
+            ->get(route('user.order-history', ['from' => ['unexpected']]))
+            ->assertRedirect(route('user.order-history'))
+            ->assertSessionHasErrors('from');
+
+        $response = $this->get(route('user.order-history'));
+        $response->assertOk()->assertSee('toast-container');
+        $this->assertSame(1, substr_count($response->getContent(), 'role="alert"'));
     }
 
     public function test_user_dashboard_sums_card_quantity_by_actual_status(): void
@@ -147,7 +304,7 @@ class OrderLifecycleTest extends TestCase
             ->get(route('user.orders.show', $order->id))
             ->assertOk()
             ->assertSee($order->order_number)
-            ->assertSee('Status timeline');
+               ->assertSee('Status History');
 
         foreach ([Order::STATUS_CONFIRMED, Order::STATUS_PROCESSING] as $status) {
             $this->actingAs($admin)

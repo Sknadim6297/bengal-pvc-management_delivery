@@ -59,7 +59,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         Route::post('/photo-print', [PhotoPrintController::class, 'submit'])->name('user.photo-print.submit');
         Route::view('/recover-failed-order', 'user-panel.recover-failed-order')->name('user.recover-failed-order');
         Route::get('/order-history', [UserOrderController::class, 'index'])->name('user.order-history');
-        Route::view('/track-help', 'user-panel.track-help')->name('user.track-help');
+        Route::get('/track-help', [UserOrderController::class, 'trackHelp'])->name('user.track-help');
         Route::get('/security', [AuthController::class, 'showUserSecurity'])->name('user.security');
         Route::post('/security/password', [AuthController::class, 'updateUserPassword'])->name('user.security.password');
     });

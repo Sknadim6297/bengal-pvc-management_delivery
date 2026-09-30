@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class UserOrderController extends Controller
 {
@@ -34,6 +35,56 @@ class UserOrderController extends Controller
         $orders = $orders->paginate(20)->withQueryString();
 
         return view('user-panel.order-history', ['orders' => $orders, 'filters' => $filters]);
+    }
+
+    public function trackHelp(Request $request): View
+    {
+        $query = $request->query->all();
+        $orderNumber = '';
+        $order = null;
+        $trackingError = null;
+
+        if (array_key_exists('order_id', $query)) {
+            $input = $query['order_id'];
+
+            if ($input === null || (is_string($input) && trim($input) === '')) {
+                $trackingError = 'Please enter your Order ID.';
+            } elseif (! is_string($input)) {
+                $trackingError = 'Please enter a valid Order ID.';
+            } else {
+                $normalizedOrderNumber = trim($input);
+
+                if (strlen($normalizedOrderNumber) > 32 || ! preg_match('/^[A-Za-z0-9-]{1,32}$/D', $normalizedOrderNumber)) {
+                    $trackingError = 'Please enter a valid Order ID.';
+                } else {
+                    $orderNumber = strtoupper($normalizedOrderNumber);
+
+                    try {
+                        $order = $request->user()->orders()
+                            ->select(['id', 'user_id', 'order_number', 'status', 'created_at'])
+                            ->with(['statusHistory' => fn ($history) => $history->select([
+                                'id', 'order_id', 'old_status', 'new_status', 'created_at',
+                            ])])
+                            ->where('order_number', $orderNumber)
+                            ->first();
+
+                        if ($order === null) {
+                            $trackingError = 'Order not found.';
+                            $orderNumber = '';
+                        }
+                    } catch (Throwable $exception) {
+                        report($exception);
+                        $trackingError = 'Unable to retrieve tracking information right now. Please try again.';
+                    }
+                }
+            }
+        }
+
+        return view('user-panel.track-help', [
+            'order' => $order,
+            'orderNumber' => $orderNumber,
+            'trackingError' => $trackingError,
+        ]);
     }
 
     public function show(Request $request, int $orderId): View

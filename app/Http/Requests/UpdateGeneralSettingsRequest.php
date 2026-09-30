@@ -20,7 +20,7 @@ class UpdateGeneralSettingsRequest extends FormRequest
             'application_name' => ['required', 'string', 'max:120'],
             'brand_name' => ['required', 'string', 'max:120'],
             'helpline_number' => ['required', 'string', 'max:32', 'regex:/^[0-9+().\s-]+$/'],
-            'whatsapp_contact_url' => ['nullable', 'string', 'url', 'regex:/^https?:\/\//i', 'max:2048'],
+            'whatsapp_contact_url' => ['nullable', 'string', 'url', 'regex:/^https:\/\/(?:wa\.me|api\.whatsapp\.com|chat\.whatsapp\.com|(?:www\.)?whatsapp\.com)(?:[\/?#]|$)/i', 'max:2048'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:max_width=2500,max_height=2500'],
             'favicon' => ['nullable', 'image', 'mimes:png,webp', 'max:1024', 'dimensions:max_width=512,max_height=512'],
         ];
