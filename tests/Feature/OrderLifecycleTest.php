@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\AdminDashboardStatistics;
+use App\Services\LiveOrderFeedService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -237,6 +238,69 @@ class OrderLifecycleTest extends TestCase
                 && (float) $statistics->total_revenue === 234.0
                 && $statistics->today_orders === 4
                 && (float) $statistics->today_revenue === 234.0);
+    }
+
+    public function test_live_order_feed_is_global_and_public_safe(): void
+    {
+        $viewer = User::factory()->create();
+        $customerA = User::factory()->create([
+            'name' => 'Alice Customer',
+            'email' => 'alice@example.com',
+            'district' => 'South 24 Parganas',
+        ]);
+        $customerB = User::factory()->create([
+            'name' => 'Bob Customer',
+            'email' => 'bob@example.com',
+            'district' => 'Purba Medinipur',
+        ]);
+
+        $ownOrder = $this->makeOrder($viewer, Order::STATUS_PENDING, 3);
+        $publicOrderA = $this->makeOrder($customerA, Order::STATUS_PENDING, 13);
+        $publicOrderB = $this->makeOrder($customerB, Order::STATUS_PROCESSING, 11);
+        $cancelledOrder = $this->makeOrder($customerB, Order::STATUS_CANCELLED, 7);
+        $photoOrder = $this->makeOrder($customerA, Order::STATUS_PENDING, 5);
+        $photoOrder->update(['service_type' => 'photo-print']);
+
+        $this->actingAs($viewer)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertViewHas('liveOrderFeed', fn ($feed): bool => $feed->contains(fn ($order): bool => $order->id === $ownOrder->id)
+                && $feed->contains(fn ($order): bool => $order->id === $publicOrderA->id)
+                && $feed->contains(fn ($order): bool => $order->id === $publicOrderB->id)
+                && ! $feed->contains(fn ($order): bool => $order->id === $cancelledOrder->id)
+                && ! $feed->contains(fn ($order): bool => $order->id === $photoOrder->id));
+
+        $this->actingAs($viewer)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertDontSee('alice@example.com')
+            ->assertDontSee('bob@example.com')
+            ->assertSee('Alice Customer ordered 13 cards')
+            ->assertSee('Bob Customer ordered 11 cards')
+            ->assertSee('South 24 Parganas')
+            ->assertSee('Purba Medinipur');
+    }
+
+    public function test_live_order_feed_uses_the_current_status_for_public_orders(): void
+    {
+        $viewer = User::factory()->create();
+        $customer = User::factory()->create(['name' => 'Status Customer']);
+        $order = $this->makeOrder($customer, Order::STATUS_PENDING, 1);
+
+        $this->assertTrue(app(LiveOrderFeedService::class)->latest()->contains(fn ($item): bool => $item->id === $order->id && $item->status === Order::STATUS_PENDING));
+
+        $order->update(['status' => Order::STATUS_PROCESSING]);
+
+        $this->assertTrue(app(LiveOrderFeedService::class)->latest()->contains(fn ($item): bool => $item->id === $order->id && $item->status === Order::STATUS_PROCESSING));
+
+        $order->update(['status' => Order::STATUS_DELIVERED]);
+
+        $this->assertTrue(app(LiveOrderFeedService::class)->latest()->contains(fn ($item): bool => $item->id === $order->id && $item->status === Order::STATUS_DELIVERED));
+
+        $this->actingAs($viewer)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Status Customer ordered 1 card');
     }
 
     public function test_order_list_query_indexes_exist(): void
