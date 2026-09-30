@@ -6,8 +6,8 @@
 			</button>
 
 			<a href="{{ route('home') }}" class="brand me-auto">
-				<img src="{{ asset('assets/img/pvc_logo.png') }}" class="brand-logo" alt="India PVC logo">
-				<div class="brand-name">India <span>PVC</span></div>
+				<img src="{{ $generalSettings->logoUrl() }}" class="brand-logo" alt="{{ $generalSettings->brand_name }} logo">
+				<div class="brand-name">{{ $generalSettings->application_name }}</div>
 			</a>
 
 			<div class="d-flex align-items-center gap-3">

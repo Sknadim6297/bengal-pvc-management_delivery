@@ -1,6 +1,6 @@
 @extends('admin-panel.layout.app')
 
-@section('title', 'PVC Orders | India PVC Admin')
+@section('title', 'PVC Orders | ' . $generalSettings->application_name . ' Admin')
 
 @section('content')
     <div class="content-card">

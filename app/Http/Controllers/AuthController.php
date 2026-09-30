@@ -10,6 +10,8 @@ use App\Support\IndianPhoneNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class AuthController extends Controller
@@ -96,6 +98,72 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('home');
+    }
+
+    public function showUserSecurity(): View
+    {
+        return view('user-panel.security', ['user' => Auth::user()]);
+    }
+
+    public function showAdminSecurity(): View
+    {
+        return view('admin-panel.security', ['user' => Auth::user()]);
+    }
+
+    public function updateUserPassword(Request $request): RedirectResponse
+    {
+        return $this->updatePassword($request, 'user.security');
+    }
+
+    public function updateAdminPassword(Request $request): RedirectResponse
+    {
+        return $this->updatePassword($request, 'admin.security');
+    }
+
+    private function updatePassword(Request $request, string $routeName): RedirectResponse
+    {
+        $user = $request->user();
+        $currentPassword = $request->input('current_password');
+        $newPassword = $request->input('password');
+        $confirmation = $request->input('password_confirmation');
+
+        if (! is_string($currentPassword) || trim($currentPassword) === '') {
+            return redirect()->route($routeName)->with('toast_error', 'Please enter your current password.');
+        }
+
+        if (! Hash::check($currentPassword, $user->password)) {
+            return redirect()->route($routeName)->with('toast_error', 'Current password is incorrect.');
+        }
+
+        if (! is_string($newPassword) || trim($newPassword) === '') {
+            return redirect()->route($routeName)->with('toast_error', 'Please enter a new password.');
+        }
+
+        if (! is_string($confirmation) || trim($confirmation) === '') {
+            return redirect()->route($routeName)->with('toast_error', 'Please confirm your new password.');
+        }
+
+        if ($newPassword !== $confirmation) {
+            return redirect()->route($routeName)->with('toast_error', 'New password and confirmation do not match.');
+        }
+
+        if ($newPassword === $currentPassword) {
+            return redirect()->route($routeName)->with('toast_error', 'New password must be different from the current password.');
+        }
+
+        $passwordRule = Password::min(12)->mixedCase()->numbers()->symbols();
+        $validator = \Validator::make($request->all(), [
+            'password' => ['required', 'string', $passwordRule],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route($routeName)->with('toast_error', 'Password must be at least 12 characters and include uppercase, lowercase, a number, and a symbol.');
+        }
+
+        $user->forceFill(['password' => $newPassword])->save();
+        $request->session()->regenerate();
+
+        return redirect()->route($routeName)->with('toast_success', 'Password updated successfully.');
     }
 
     private function invalidCredentials(): RedirectResponse

@@ -10,10 +10,12 @@
 		</div>
 		<nav class="sidebar-menu">
 			<a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
+			<a href="{{ route('admin.general-settings.edit') }}" class="{{ request()->routeIs('admin.general-settings.*') ? 'active' : '' }}"><i class="bi bi-gear-fill"></i><span>General Settings</span></a>
 			<a href="{{ route('admin.pricing.edit') }}" class="{{ request()->routeIs('admin.pricing.*') ? 'active' : '' }}"><i class="bi bi-tags-fill"></i><span>Pricing Settings</span></a>
 			<a href="{{ route('admin.pvc-orders.index') }}" class="{{ request()->routeIs('admin.pvc-orders.*') ? 'active' : '' }}"><i class="bi bi-credit-card-2-front-fill"></i><span>PVC Orders</span></a>
 			<a href="{{ route('admin.photo-orders.index') }}" class="{{ request()->routeIs('admin.photo-orders.*') ? 'active' : '' }}"><i class="bi bi-image-fill"></i><span>Photo Orders</span></a>
 			<a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}"><i class="bi bi-people-fill"></i><span>All Users</span></a>
+			<a href="{{ route('admin.security') }}" class="{{ request()->routeIs('admin.security') ? 'active' : '' }}"><i class="bi bi-shield-lock-fill"></i><span>Security Settings</span></a>
 			<form method="POST" action="{{ route('logout') }}">
 				@csrf
 				<button type="submit" class="admin-sidebar-logout"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button>
@@ -31,10 +33,12 @@
 		</div>
 		<nav class="sidebar-menu">
 			<a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
+			<a href="{{ route('admin.general-settings.edit') }}" class="{{ request()->routeIs('admin.general-settings.*') ? 'active' : '' }}"><i class="bi bi-gear-fill"></i><span>General Settings</span></a>
 			<a href="{{ route('admin.pricing.edit') }}" class="{{ request()->routeIs('admin.pricing.*') ? 'active' : '' }}"><i class="bi bi-tags-fill"></i><span>Pricing Settings</span></a>
 			<a href="{{ route('admin.pvc-orders.index') }}" class="{{ request()->routeIs('admin.pvc-orders.*') ? 'active' : '' }}"><i class="bi bi-credit-card-2-front-fill"></i><span>PVC Orders</span></a>
 			<a href="{{ route('admin.photo-orders.index') }}" class="{{ request()->routeIs('admin.photo-orders.*') ? 'active' : '' }}"><i class="bi bi-image-fill"></i><span>Photo Orders</span></a>
 			<a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}"><i class="bi bi-people-fill"></i><span>All Users</span></a>
+			<a href="{{ route('admin.security') }}" class="{{ request()->routeIs('admin.security') ? 'active' : '' }}"><i class="bi bi-shield-lock-fill"></i><span>Security Settings</span></a>
 			<form method="POST" action="{{ route('logout') }}">
 				@csrf
 				<button type="submit" class="admin-sidebar-logout"><i class="bi bi-box-arrow-right"></i><span>Logout</span></button>

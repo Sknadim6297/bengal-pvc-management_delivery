@@ -1,6 +1,6 @@
 @extends('user-panel.layout.app')
 
-@section('title', 'Order Details | India PVC')
+@section('title', 'Order Details | ' . $generalSettings->application_name)
 
 @section('content')
     <div class="content-card">

@@ -15,13 +15,16 @@
                 <!-- Logo -->
                 <a href="{{ route('home') }}" class="brand me-auto">
 
-                    <!-- Replace with your logo -->
-                    <img src="{{ asset('assets/img/pvc_logo.png') }}"
+                    <img src="{{ $generalSettings->logoUrl() }}"
                         class="brand-logo"
-                        alt="Bengal PVC">
+                        alt="{{ $generalSettings->brand_name }}">
 
                     <div class="brand-name">
-                        @yield('brand-label', 'India') <span>PVC</span>
+                        @hasSection('brand-label')
+                            @yield('brand-label') <span>PVC</span>
+                        @else
+                            {{ $generalSettings->application_name }}
+                        @endif
                     </div>
 
                 </a>
@@ -30,7 +33,7 @@
 
                     <div class="help-box">
                         <i class="bi bi-headset"></i>
-                        Helpline: +91 8900162634
+                        Helpline: {{ $generalSettings->helpline_number }}
                     </div>
 
                     <div class="user-box">

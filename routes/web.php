@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\GeneralSettingsController;
 use App\Http\Controllers\Admin\PricingSettingsController;
 use App\Http\Controllers\Admin\PvcOrderController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -30,6 +31,8 @@ Route::middleware(['auth', 'account.active'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->middleware('role:admin')->name('admin.dashboard');
 
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
+        Route::get('/general-settings', [GeneralSettingsController::class, 'edit'])->name('general-settings.edit');
+        Route::put('/general-settings', [GeneralSettingsController::class, 'update'])->name('general-settings.update');
         Route::get('/pricing', [PricingSettingsController::class, 'edit'])->name('pricing.edit');
         Route::put('/pricing', [PricingSettingsController::class, 'update'])->name('pricing.update');
         Route::get('/pvc-orders', [PvcOrderController::class, 'index'])->name('pvc-orders.index');
@@ -43,6 +46,8 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
         Route::get('/users/{userId}', [UserManagementController::class, 'show'])->whereNumber('userId')->name('users.show');
         Route::patch('/users/{userId}/status', [UserManagementController::class, 'updateStatus'])->whereNumber('userId')->name('users.status');
+        Route::get('/security', [AuthController::class, 'showAdminSecurity'])->name('security');
+        Route::post('/security/password', [AuthController::class, 'updateAdminPassword'])->name('security.password');
     });
 
     Route::middleware('role:user')->group(function () {
@@ -55,6 +60,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         Route::view('/recover-failed-order', 'user-panel.recover-failed-order')->name('user.recover-failed-order');
         Route::get('/order-history', [UserOrderController::class, 'index'])->name('user.order-history');
         Route::view('/track-help', 'user-panel.track-help')->name('user.track-help');
-        Route::view('/security', 'user-panel.security')->name('user.security');
+        Route::get('/security', [AuthController::class, 'showUserSecurity'])->name('user.security');
+        Route::post('/security/password', [AuthController::class, 'updateUserPassword'])->name('user.security.password');
     });
 });

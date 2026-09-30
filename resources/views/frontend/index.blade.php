@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>India PVC</title>
+    <title>{{ $generalSettings->application_name }}</title>
+    <link rel="icon" href="{{ $generalSettings->faviconUrl() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ asset('assets/style.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
@@ -23,12 +24,12 @@
                 <!-- LOGO -->
                 <a href="{{ route('home') }}" class="brand-area">
 
-                    <img src="{{ asset('assets/img/pvc_logo.png') }}"
+                    <img src="{{ $generalSettings->logoUrl() }}"
                         class="brand-logo"
-                        alt="India PVC">
+                        alt="{{ $generalSettings->brand_name }}">
 
                     <div class="brand-name">
-                        India <span>PVC</span>
+                        {{ $generalSettings->application_name }}
                     </div>
 
                 </a>
@@ -113,7 +114,7 @@
                             </a>
 
 
-                            <a href="#" class="hero-btn whatsapp-btn">
+                            <a href="{{ $generalSettings->whatsappContactUrl() ?? '#' }}" class="hero-btn whatsapp-btn">
 
                                 <i class="bi bi-whatsapp"></i>
 
@@ -764,12 +765,12 @@
     
 
 
-    @if (filled(config('services.whatsapp_contact_url')))
+    @if (filled($generalSettings->whatsappContactUrl()))
         <div class="whatsapp-floating">
-            <a href="{{ config('services.whatsapp_contact_url') }}"
+            <a href="{{ $generalSettings->whatsappContactUrl() }}"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Contact Bengal PVC on WhatsApp">
+                aria-label="Contact {{ $generalSettings->brand_name }} on WhatsApp">
                 <i class="bi bi-whatsapp"></i>
             </a>
         </div>

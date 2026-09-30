@@ -94,6 +94,90 @@ class AuthFlowTest extends TestCase
             ], false);
     }
 
+    public function test_user_can_update_their_password_with_current_password_verification(): void
+    {
+        $user = User::factory()->create([
+            'password' => 'OldPassword123!',
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('user.security'))
+            ->post(route('user.security.password'), [
+                'current_password' => 'OldPassword123!',
+                'password' => 'NewSecurePass123!',
+                'password_confirmation' => 'NewSecurePass123!',
+            ])
+            ->assertRedirect(route('user.security'))
+            ->assertSessionHas('toast_success', 'Password updated successfully.');
+
+        $user->refresh();
+        $this->assertTrue(Hash::check('NewSecurePass123!', $user->password));
+        $this->assertFalse(Hash::check('OldPassword123!', $user->password));
+    }
+
+    public function test_admin_can_update_their_password_with_current_password_verification(): void
+    {
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+            'password' => 'AdminOldPass123!',
+        ]);
+
+        $this->actingAs($admin)
+            ->from(route('admin.security'))
+            ->post(route('admin.security.password'), [
+                'current_password' => 'AdminOldPass123!',
+                'password' => 'AdminNewPass123!',
+                'password_confirmation' => 'AdminNewPass123!',
+            ])
+            ->assertRedirect(route('admin.security'))
+            ->assertSessionHas('toast_success', 'Password updated successfully.');
+
+        $admin->refresh();
+        $this->assertTrue(Hash::check('AdminNewPass123!', $admin->password));
+        $this->assertFalse(Hash::check('AdminOldPass123!', $admin->password));
+    }
+
+    public function test_password_change_rejects_wrong_current_password_and_mismatched_confirmation(): void
+    {
+        $user = User::factory()->create([
+            'password' => 'OriginalPass123!',
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('user.security'))
+            ->post(route('user.security.password'), [
+                'current_password' => 'WrongPassword123!',
+                'password' => 'NewPassword123!',
+                'password_confirmation' => 'DifferentPass123!',
+            ])
+            ->assertRedirect(route('user.security'))
+            ->assertSessionHas('toast_error', 'Current password is incorrect.');
+
+        $user->refresh();
+        $this->assertTrue(Hash::check('OriginalPass123!', $user->password));
+        $this->assertFalse(Hash::check('NewPassword123!', $user->password));
+    }
+
+    public function test_password_change_rejects_weak_password_with_single_guidance_message(): void
+    {
+        $user = User::factory()->create([
+            'password' => 'OriginalPass123!',
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('user.security'))
+            ->post(route('user.security.password'), [
+                'current_password' => 'OriginalPass123!',
+                'password' => 'weak',
+                'password_confirmation' => 'weak',
+            ])
+            ->assertRedirect(route('user.security'))
+            ->assertSessionHas('toast_error', 'Password must be at least 12 characters and include uppercase, lowercase, a number, and a symbol.');
+
+        $user->refresh();
+        $this->assertTrue(Hash::check('OriginalPass123!', $user->password));
+    }
+
     public function test_user_can_register_and_is_redirected_to_dashboard(): void
     {
         $response = $this->post('/register', [
